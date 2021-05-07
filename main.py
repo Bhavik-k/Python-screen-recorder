@@ -1,5 +1,7 @@
 import datetime
+from datetime import datetime
 
+import moviepy.editor as mp
 from PIL import ImageGrab
 import numpy as np
 import cv2
@@ -7,27 +9,28 @@ from win32api import GetSystemMetrics
 
 import multiprocessing
 import argparse
-import tempfile
 import queue
 import sys
 
 import sounddevice as sd
 import soundfile as sf
 import numpy
-import os
-
 assert numpy
 
-finished = 0
+
+Filename = datetime.now().strftime('%Y-%m-%d--%H_%M_')
+
+
 
 def recScreen():
 
     whd = GetSystemMetrics(0)
     hei = GetSystemMetrics(1)
 
-    Filename = datetime.datetime.now().strftime('%Y-%m-%d--%H_%M_%S.mp4')
+    global Filename
     fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
-    captured_vid = cv2.VideoWriter(Filename, fourcc, 10, (whd, hei))
+    captured_vid = cv2.VideoWriter(Filename+'.mp4', fourcc,
+    10, (whd, hei))
 
     while True:
         img = ImageGrab.grab(bbox=(0, 0, whd, hei))
@@ -88,8 +91,9 @@ def recAudio():
             # soundfile expects an int, sounddevice provides a float:
             args.samplerate = int(device_info['default_samplerate'])
         if args.filename is None:
-            args.filename = tempfile.mktemp(prefix='delme_rec_unlimited_',
-                                            suffix='.wav', dir='')
+            global Filename
+            args.filename = Filename+'.wav'
+
 
         # Make sure the file is opened before recording anything:
         with sf.SoundFile(args.filename, mode='x', samplerate=args.samplerate,
@@ -112,11 +116,18 @@ process1 = multiprocessing.Process(target=recScreen)
 process2 = multiprocessing.Process(target=recAudio)
 
 if __name__ == '__main__':
-    process1.start()
     process2.start()
-    # process1.join
+    process1.start()
+    # process1.join()
+    # process2.join()
 
     while True:
         if process1.is_alive() == False:
             process2.terminate()
+            clip = mp.VideoFileClip (Filename+'.mp4')
+            Audio = mp.AudioFileClip(Filename+'.wav')
+
+            finalClip = clip.set_audio(Audio)
+
+            finalClip.write_videofile('final' + Filename + '.mp4');
             break
