@@ -6,6 +6,7 @@ from PIL import ImageGrab
 import numpy as np
 import cv2
 from win32api import GetSystemMetrics
+import pyautogui
 
 import multiprocessing
 import argparse
@@ -21,6 +22,9 @@ assert numpy
 Filename = datetime.now().strftime('%Y-%m-%d--%H_%M_')
 
 
+Xs = [0,8,6,14,12,4,2,0]
+Ys = [0,2,4,12,14,6,8,0]
+
 
 def recScreen():
 
@@ -29,13 +33,29 @@ def recScreen():
 
     global Filename
     fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
-    captured_vid = cv2.VideoWriter(Filename+'.mp4', fourcc,
-    10, (whd, hei))
+    captured_vid = cv2.VideoWriter(Filename+'.mp4', fourcc, 10, (whd, hei))
 
     while True:
+        ####
+        img = pyautogui.screenshot()
+        mouseX, mouseY = pyautogui.position()
+        ####
+
+
         img = ImageGrab.grab(bbox=(0, 0, whd, hei))
         img_np = np.array(img)
         img_final = cv2.cvtColor(img_np, cv2.COLOR_BGR2RGB)
+
+
+        ####
+        Xthis = [x + mouseX for x in Xs]
+        Ythis = [y + mouseY for y in Ys]
+        points = list(zip(Xthis, Ythis))
+        points = np.array(points, 'int32')
+        cv2.fillPoly(img_final, [points], color=[0, 0, 255])
+        ####
+
+
         cv2.imshow('SuperRec', img_final)
         captured_vid.write(img_final)
 
