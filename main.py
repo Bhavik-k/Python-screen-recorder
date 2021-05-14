@@ -60,7 +60,6 @@ def recScreen():
         cv2.imshow('SuperRec', img_final)
         captured_vid.write(img_final)
 
-        break
         if cv2.waitKey(30) == ord('q'):
             break
 
