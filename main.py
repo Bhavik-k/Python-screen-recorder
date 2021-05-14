@@ -33,13 +33,14 @@ def recScreen():
 
     global Filename
     fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
-    captured_vid = cv2.VideoWriter(Filename+'.mp4', fourcc, 10, (whd, hei))
+    captured_vid = cv2.VideoWriter(Filename+'.mp4', fourcc,20, (whd, hei))
 
     while True:
         ####
         img = pyautogui.screenshot()
         mouseX, mouseY = pyautogui.position()
         ####
+
 
 
         img = ImageGrab.grab(bbox=(0, 0, whd, hei))
@@ -59,7 +60,8 @@ def recScreen():
         cv2.imshow('SuperRec', img_final)
         captured_vid.write(img_final)
 
-        if cv2.waitKey(10) == ord('q'):
+        break
+        if cv2.waitKey(30) == ord('q'):
             break
 
 
